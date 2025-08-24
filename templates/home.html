@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<section style="text-align:center;margin-bottom:18px">
+  <h1 style="margin:8px 0">{{ BUSINESS_TAGLINE }}</h1>
+  {% if hero_cta %}<a class="btn" href="{{ hero_cta }}" target="_blank">📲 Commander sur WhatsApp</a>{% endif %}
+</section>
+
+{% if categories %}
+<h2>Catégories</h2>
+<p>
+  {% for c in categories %}
+    <a class="btn" href="{% url 'product_list' c.slug %}">{{ c.name }}</a>
+  {% endfor %}
+</p>
+{% endif %}
+
+<h2>Nouveautés</h2>
+<div class="grid">
+  {% for p in products %}
+  <a class="card" href="{% url 'product_detail' p.slug %}">
+    {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}">{% endif %}
+    <div style="font-weight:700;margin-top:6px">{{ p.name }}</div>
+    <div style="margin-top:4px">{{ p.price }} FCFA</div>
+    <div><span class="btn">👀 Voir</span></div>
+  </a>
+  {% empty %}
+  <p>Aucun produit pour le moment.</p>
+  {% endfor %}
+</div>
+{% endblock %}

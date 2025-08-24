@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} — {{ BUSINESS_NAME }}{% endblock %}
+{% block content %}
+<div style="display:flex;gap:20px;flex-wrap:wrap">
+  {% if product.thumbnail %}
+    <img src="{{ product.thumbnail.url }}" alt="{{ product.name }}" style="width:320px;max-width:100%;border-radius:12px">
+  {% endif %}
+  <div>
+    <h2>{{ product.name }}</h2>
+    <div style="font-size:22px;margin:8px 0">{{ product.price }} FCFA</div>
+    {% if wa %}<a class="btn" target="_blank" href="{{ wa }}">📲 Commander sur WhatsApp</a>{% endif %}
+  </div>
+</div>
+{% endblock %}

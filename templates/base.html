@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}{{ BUSINESS_NAME }}{% endblock %}</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;margin:0;background:#fafafa;color:#111}
+    header,footer{background:#0a0a0a;color:#fff}
+    header .wrap, footer .wrap{max-width:1000px;margin:0 auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+    a{color:inherit;text-decoration:none}
+    nav a{margin-left:12px}
+    .container{max-width:1000px;margin:0 auto;padding:16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .card{background:#fff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .card img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+    .btn{display:inline-block;background:#0a0a0a;color:#fff;padding:12px 16px;border-radius:12px}
+    .float-wa{position:fixed;right:16px;bottom:16px;background:#25D366;color:#fff;padding:12px 16px;border-radius:999px;font-weight:700}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div style="font-weight:700">{{ BUSINESS_NAME }}</div>
+    <nav>
+      <a href="/">🏠 Accueil</a>
+      <a href="/a-propos/">🏢 À propos</a>
+      <a href="/contact/">📞 Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>{{ BUSINESS_ADDRESS }} — {{ BUSINESS_HOURS }}</div>
+    <div>Tel: {{ BUSINESS_PHONE }}</div>
+  </div>
+</footer>
+
+{% block floating %}
+  <a class="float-wa" href="https://wa.me/{{ BUSINESS_WHATSAPP }}" target="_blank">WhatsApp</a>
+{% endblock %}
+</body>
+</html>

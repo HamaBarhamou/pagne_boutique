@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Contact — {{ BUSINESS_NAME }}{% endblock %}
+{% block content %}
+<h2>Contact</h2>
+<p><strong>Téléphone :</strong> {{ BUSINESS_PHONE }}</p>
+<p><strong>Adresse :</strong> {{ BUSINESS_ADDRESS }}</p>
+<p><strong>Horaires :</strong> {{ BUSINESS_HOURS }}</p>
+<p>
+  {% if wa %}<a class="btn" target="_blank" href="{{ wa }}">📲 WhatsApp</a>{% endif %}
+  {% if maps_url %}<a class="btn" target="_blank" href="{{ maps_url }}">🗺️ Nous trouver</a>{% endif %}
+</p>
+{% endblock %}

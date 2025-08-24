@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} — {{ BUSINESS_NAME }}{% endblock %}
+{% block content %}
+<h2>🗂️ {{ category.name }}</h2>
+<div class="grid">
+  {% for p in products %}
+  <a class="card" href="{% url 'product_detail' p.slug %}">
+    {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}">{% endif %}
+    <div style="font-weight:700;margin-top:6px">{{ p.name }}</div>
+    <div style="margin-top:4px">{{ p.price }} FCFA</div>
+    <div><span class="btn">👀 Voir</span></div>
+  </a>
+  {% empty %}
+  <p>Aucun produit dans cette catégorie.</p>
+  {% endfor %}
+</div>
+{% endblock %}
