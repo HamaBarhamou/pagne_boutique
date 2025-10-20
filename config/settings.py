@@ -142,3 +142,7 @@ BUSINESS_INSTAGRAM = ""
 BUSINESS_EMAIL = "contact@abh.com"
 BUSINESS_EMAIL_SALES = "ventes@abh.com"
 BUSINESS_EMAIL_SUPPORT = "support@abh.com"
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "staff_dashboard"
+LOGOUT_REDIRECT_URL = "home"

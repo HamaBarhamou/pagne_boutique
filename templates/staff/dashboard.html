@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Espace staff — {{ BUSINESS_NAME }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="hero" style="border-radius:18px;padding:22px">
+    <h1 style="margin:0 0 6px">Espace staff</h1>
+    <p style="opacity:.9;margin:0">Bienvenue, {{ request.user.get_username }}.</p>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn ghost" href="{% url 'admin:index' %}">Aller à l’administration Django</a>
+      <a class="btn outline" href="{% url 'logout' %}">Se déconnecter</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="grid">
+    <div class="card" style="border-top:4px solid var(--indigo)">
+      <div class="card-body">
+        <div class="muted">Produits actifs</div>
+        <div style="font-size:26px;font-weight:800">{{ active_products }}</div>
+      </div>
+    </div>
+    <div class="card" style="border-top:4px solid var(--emerald)">
+      <div class="card-body">
+        <div class="muted">Produits (total)</div>
+        <div style="font-size:26px;font-weight:800">{{ total_products }}</div>
+      </div>
+    </div>
+    <div class="card" style="grid-column:1 / -1;border-top:4px solid var(--gold)">
+      <div class="card-body">
+        <div class="muted" style="margin-bottom:8px">Catégories principales</div>
+        <div class="badges">
+          {% for c in categories %}
+            <span class="badge indigo">{{ c.name }} ({{ c.n }})</span>
+          {% empty %}
+            <span class="muted">Aucune catégorie</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

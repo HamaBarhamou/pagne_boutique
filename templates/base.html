@@ -136,10 +136,20 @@
       <div>Horaires: {{ BUSINESS_HOURS }}</div>
     </div>
     <div>
-      <div class="muted">Suivre / Commander</div><br>
-      <a class="btn outline" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}">WhatsApp</a>
-      {% if BUSINESS_INSTAGRAM %}<a class="btn ghost" target="_blank" href="{{ BUSINESS_INSTAGRAM }}">Instagram</a>{% endif %}
+    <div class="muted">Suivre / Commander</div><br>
+    <a class="btn outline" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}">WhatsApp</a>
+    {% if BUSINESS_INSTAGRAM %} <a class="btn ghost" target="_blank" href="{{ BUSINESS_INSTAGRAM }}">Instagram</a>{% endif %}
+
+    <div style="margin-top:14px">
+      {% if request.user.is_authenticated and request.user.is_staff %}
+        <a class="btn outline" href="{% url 'staff_dashboard' %}">Espace staff</a>
+        <a class="btn ghost" href="{% url 'logout' %}">Déconnexion</a>
+      {% else %}
+        <a class="btn outline" href="{% url 'login' %}">Connexion staff</a>
+      {% endif %}
     </div>
+</div>
+
   </div>
   <div class="wrap copy">
     © {% now "Y" %} {{ BUSINESS_NAME }} — Tous droits réservés.

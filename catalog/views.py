@@ -3,7 +3,30 @@ from urllib.parse import quote
 from django.conf import settings
 from .models import Category, Product
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.contrib.auth.decorators import user_passes_test
+
+
+def _is_staff(user):
+    return user.is_active and user.is_staff
+
+
+@user_passes_test(_is_staff)
+def staff_dashboard(request):
+    # Stats simples pour démarrer
+    total_products = Product.objects.count()
+    active_products = Product.objects.filter(is_active=True).count()
+    categories = Category.objects.annotate(n=Count("products")).order_by("-n")[:10]
+
+    return render(
+        request,
+        "staff/dashboard.html",
+        {
+            "total_products": total_products,
+            "active_products": active_products,
+            "categories": categories,
+        },
+    )
 
 
 def _wa_link(text: str):
