@@ -122,6 +122,18 @@
 </header>
 
 <main class="wrap">
+  {% if messages %}
+    <div class="section" style="margin-top:0">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        {% for m in messages %}
+          <div class="card" style="border-left:4px solid {% if m.tags == 'success' %}var(--emerald){% elif m.tags == 'error' %}#b42318{% else %}var(--indigo){% endif %};">
+            <div class="card-body">{{ m }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
   {% block breadcrumbs %}{% endblock %}
   {% block content %}{% endblock %}
 </main>

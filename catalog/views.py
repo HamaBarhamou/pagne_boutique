@@ -1,14 +1,82 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.urls import reverse, reverse_lazy
 from urllib.parse import quote
 from django.conf import settings
 from .models import Category, Product
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.contrib.auth.decorators import user_passes_test
+from .forms import ProductForm
 
 
 def _is_staff(user):
     return user.is_active and user.is_staff
+
+
+@user_passes_test(_is_staff)
+def staff_products_list(request):
+    q = request.GET.get("q", "").strip()
+    qs = Product.objects.select_related("category").all().order_by("-id")
+    if q:
+        qs = qs.filter(
+            Q(name__icontains=q) | Q(slug__icontains=q) | Q(category__name__icontains=q)
+        )
+
+    paginator = Paginator(qs, 15)
+    page = request.GET.get("page")
+    page_obj = paginator.get_page(page)
+    return render(request, "staff/products/list.html", {"page_obj": page_obj, "q": q})
+
+
+@user_passes_test(_is_staff)
+def staff_product_create(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save()
+            messages.success(request, "Produit créé avec succès.")
+            return redirect("staff_products_list")
+    else:
+        form = ProductForm()
+    return render(request, "staff/products/form.html", {"form": form, "mode": "create"})
+
+
+@user_passes_test(_is_staff)
+def staff_product_edit(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Produit mis à jour.")
+            return redirect("staff_products_list")
+    else:
+        form = ProductForm(instance=product)
+    return render(
+        request,
+        "staff/products/form.html",
+        {"form": form, "mode": "edit", "product": product},
+    )
+
+
+@user_passes_test(_is_staff)
+def staff_product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        product.delete()
+        messages.success(request, "Produit supprimé.")
+        return redirect("staff_products_list")
+    return render(request, "staff/products/confirm_delete.html", {"product": product})
+
+
+@user_passes_test(_is_staff)
+def staff_product_toggle(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.is_active = not product.is_active
+    product.save(update_fields=["is_active"])
+    messages.info(request, f"Produit {'activé' if product.is_active else 'désactivé'}.")
+    return redirect("staff_products_list")
 
 
 @user_passes_test(_is_staff)

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Produits — Espace staff{% endblock %}
+
+{% block content %}
+<style>
+  .tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden}
+  .tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--ring);text-align:left}
+  .tbl th{background:var(--surface);font-weight:700}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .inp{height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)}
+  .k{font-size:12px;color:var(--muted)}
+</style>
+
+<section class="section">
+  <div class="toolbar">
+    <h1 style="margin:0">Produits</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <form method="get" style="display:flex;gap:8px">
+        <input class="inp" type="search" name="q" value="{{ q }}" placeholder="Rechercher…">
+        <button class="btn outline" type="submit">Rechercher</button>
+      </form>
+      <a class="btn primary" href="{% url 'staff_product_create' %}">Nouveau produit</a>
+    </div>
+  </div>
+
+  <div class="k">{{ page_obj.paginator.count }} produit{{ page_obj.paginator.count|pluralize:",s" }}</div>
+
+  <div class="tbl-wrap" style="margin-top:10px">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Catégorie</th>
+          <th>Prix</th>
+          <th>Actif</th>
+          <th style="width:220px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in page_obj %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" width="44" height="44" style="border-radius:8px;object-fit:cover">{% endif %}
+              <div>
+                <div style="font-weight:700">{{ p.name }}</div>
+                <div class="k">{{ p.slug }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ p.category.name }}</td>
+          <td>{{ p.price|intcomma }} FCFA</td>
+          <td>{% if p.is_active %}<span class="badge emerald">Actif</span>{% else %}<span class="badge coral">Inactif</span>{% endif %}</td>
+          <td>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a class="btn outline" href="{% url 'product_detail' p.slug %}" target="_blank">Voir</a>
+              <a class="btn outline" href="{% url 'staff_product_edit' p.pk %}">Éditer</a>
+              <a class="btn ghost" href="{% url 'staff_product_toggle' p.pk %}">{% if p.is_active %}Désactiver{% else %}Activer{% endif %}</a>
+              <a class="btn" style="background:#b42318;color:#fff" href="{% url 'staff_product_delete' p.pk %}">Supprimer</a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="k" style="text-align:center">Aucun produit.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <div class="section pagination">
+      {% if page_obj.has_previous %}
+        <a class="page" href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.previous_page_number }}">Précédent</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <span class="page active">{{ num }}</span>
+        {% elif num > page_obj.number|add:-2 and num < page_obj.number|add:2 %}
+          <a class="page" href="?{% if q %}q={{ q }}&{% endif %}page={{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a class="page" href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.next_page_number }}">Suivant</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

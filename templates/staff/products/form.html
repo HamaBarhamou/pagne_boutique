@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "create" %}Nouveau produit{% else %}Éditer produit{% endif %} — Espace staff{% endblock %}
+{% block content %}
+<style>
+  .inp{height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg);width:100%}
+  .chk{transform:translateY(2px)}
+  .form-card{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:16px}
+  .row{display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width:900px){.row{grid-template-columns:1fr 1fr}}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+
+<section class="section">
+  <h1 style="margin:0 0 10px">{% if mode == "create" %}Nouveau produit{% else %}Éditer produit{% endif %}</h1>
+  <form method="post" enctype="multipart/form-data" class="form-card">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="badge coral" style="display:inline-block;margin-bottom:10px">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row">
+      <label>Catégorie {{ form.category }}</label>
+      <label>Nom {{ form.name }}</label>
+      <label>Slug {{ form.slug }}</label>
+      <label>Prix (FCFA) {{ form.price }}</label>
+      <label>Vignette (thumbnail) {{ form.thumbnail }}</label>
+      <label style="display:flex;align-items:center;gap:8px">Actif {{ form.is_active }}</label>
+    </div>
+
+    <div class="actions" style="margin-top:12px">
+      <button class="btn primary" type="submit">{% if mode == "create" %}Créer{% else %}Enregistrer{% endif %}</button>
+      <a class="btn outline" href="{% url 'staff_products_list' %}">Annuler</a>
+      {% if mode == "edit" %}
+        <a class="btn ghost" href="{% url 'product_detail' product.slug %}" target="_blank">Voir</a>
+      {% endif %}
+    </div>
+  </form>
+</section>
+{% endblock %}

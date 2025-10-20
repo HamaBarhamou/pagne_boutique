@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Supprimer produit — Espace staff{% endblock %}
+{% block content %}
+<section class="section" style="max-width:640px">
+  <div class="hero" style="border-radius:16px">
+    <h1 style="margin:0 0 10px">Supprimer le produit</h1>
+    <p>Voulez-vous vraiment supprimer <strong>{{ product.name }}</strong> ? Cette action est irréversible.</p>
+    <form method="post" style="margin-top:12px">
+      {% csrf_token %}
+      <button class="btn" type="submit" style="background:#b42318;color:#fff;border:1px solid rgba(0,0,0,.2)">Supprimer définitivement</button>
+      <a class="btn outline" href="{% url 'staff_products_list' %}">Annuler</a>
+    </form>
+  </div>
+</section>
+{% endblock %}

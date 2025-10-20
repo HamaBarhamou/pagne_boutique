@@ -21,4 +21,28 @@ urlpatterns = [
         "staff/logout/", auth_views.LogoutView.as_view(next_page="home"), name="logout"
     ),
     path("staff/", catalog_views.staff_dashboard, name="staff_dashboard"),
+    # Staff — produits
+    path(
+        "staff/products/", catalog_views.staff_products_list, name="staff_products_list"
+    ),
+    path(
+        "staff/products/new/",
+        catalog_views.staff_product_create,
+        name="staff_product_create",
+    ),
+    path(
+        "staff/products/<int:pk>/edit/",
+        catalog_views.staff_product_edit,
+        name="staff_product_edit",
+    ),
+    path(
+        "staff/products/<int:pk>/delete/",
+        catalog_views.staff_product_delete,
+        name="staff_product_delete",
+    ),
+    path(
+        "staff/products/<int:pk>/toggle/",
+        catalog_views.staff_product_toggle,
+        name="staff_product_toggle",
+    ),
 ]
