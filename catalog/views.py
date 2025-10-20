@@ -7,11 +7,22 @@ from .models import Category, Product
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import logout
 from .forms import ProductForm
 
 
 def _is_staff(user):
     return user.is_active and user.is_staff
+
+
+def staff_logout(request):
+    """
+    Déconnecte l'utilisateur puis redirige vers l'accueil.
+    Accepte GET et POST pour simplifier l'UX.
+    """
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect("home")
 
 
 @user_passes_test(_is_staff)

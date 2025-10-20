@@ -17,9 +17,7 @@ urlpatterns = [
         auth_views.LoginView.as_view(template_name="staff/login.html"),
         name="login",
     ),
-    path(
-        "staff/logout/", auth_views.LogoutView.as_view(next_page="home"), name="logout"
-    ),
+    path("staff/logout/", catalog_views.staff_logout, name="logout"),
     path("staff/", catalog_views.staff_dashboard, name="staff_dashboard"),
     # Staff — produits
     path(
