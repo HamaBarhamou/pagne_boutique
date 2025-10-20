@@ -2,6 +2,64 @@
 {% load humanize %}
 {% block title %}{{ current_category.name|default:"Produits" }} — {{ BUSINESS_NAME }}{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* ====== En-tête & filtres ====== */
+  .pl-head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:18px;border:1px solid var(--ring);border-radius:16px;background:var(--surface)
+  }
+  .pl-head h1{margin:0}
+  .pl-count{color:var(--muted);margin-top:6px}
+  .pl-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pl-inp,.pl-select{
+    height:42px;border-radius:12px;border:1px solid var(--ring);
+    padding:0 12px;background:var(--card);color:var(--fg)
+  }
+
+  /* ====== Grille & cartes ====== */
+  .pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+  .p-card{
+    background:var(--card);border:1px solid var(--ring);border-radius:16px;overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.05);transition:transform .14s ease, box-shadow .14s ease;display:block
+  }
+  .p-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(0,0,0,.1)}
+
+  .p-media{position:relative;aspect-ratio:4/3;background:#eee}
+  .p-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+  .p-grad{position:absolute;left:0;right:0;bottom:0;height:42%;
+          background:linear-gradient(0deg, rgba(0,0,0,.5), rgba(0,0,0,0))}
+  .p-price{
+    position:absolute;top:10px;right:10px;padding:6px 10px;border-radius:999px;
+    background:var(--brand);color:#fff;font-weight:800;border:1px solid var(--brand-border);font-size:13px
+  }
+  .p-name{
+    position:absolute;left:10px;right:10px;bottom:10px;color:#fff;font-weight:800;line-height:1.25
+  }
+
+  .p-body{padding:10px 12px}
+  .p-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+  /* Catégorie = micro-badge discret (outline) */
+  .cat-badge{
+    display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;
+    border:1px solid var(--ring);background:var(--card);color:var(--fg)
+  }
+
+  /* Slug = très discret et tronqué (ne s’impose pas) */
+  .slug{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    font-size:11px;color:var(--muted);background:transparent;border:0;
+    max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+
+  /* Résumé filtres (si présent) */
+  .pl-badges{display:flex;gap:8px;flex-wrap:wrap}
+  .pl-badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--ring);background:var(--card)}
+</style>
+{% endblock %}
+
 {% block breadcrumbs %}
 <nav class="breadcrumbs wrap" style="margin-top:8px">
   <a href="/">Accueil</a> ›
@@ -10,16 +68,17 @@
 {% endblock %}
 
 {% block content %}
-<section class="section" style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap">
+<section class="section pl-head">
   <div>
-    <h1 style="margin:0">{{ current_category.name|default:"Tous les produits" }}</h1>
-    <div class="muted" style="margin-top:6px">{{ paginator.count|default:page_obj.paginator.count }} article{{ paginator.count|default:page_obj.paginator.count|pluralize:",s" }}</div>
+    <h1>{{ current_category.name|default:"Tous les produits" }}</h1>
+    <div class="pl-count">
+      {{ paginator.count|default:page_obj.paginator.count }} article{{ paginator.count|default:page_obj.paginator.count|pluralize:",s" }}
+    </div>
   </div>
 
-  <!-- Barre de filtres -->
-  <form method="get" action="" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un pagne…" aria-label="Recherche" style="height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)">
-    <select name="order" aria-label="Tri" style="height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)">
+  <form method="get" action="" class="pl-filters">
+    <input class="pl-inp" type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un pagne…" aria-label="Recherche">
+    <select class="pl-select" name="order" aria-label="Tri">
       <option value="">Trier</option>
       <option value="new" {% if request.GET.order == "new" %}selected{% endif %}>Nouveautés</option>
       <option value="price_asc" {% if request.GET.order == "price_asc" %}selected{% endif %}>Prix ↑</option>
@@ -33,49 +92,51 @@
 </section>
 
 {% if request.GET.q or request.GET.order %}
-  <div class="section" style="margin-top:0">
-    <div class="badges">
-      {% if request.GET.q %}<span class="badge gold">Recherche: “{{ request.GET.q }}”</span>{% endif %}
-      {% if request.GET.order == "new" %}<span class="badge indigo">Tri: Nouveautés</span>{% endif %}
-      {% if request.GET.order == "price_asc" %}<span class="badge emerald">Tri: Prix ↑</span>{% endif %}
-      {% if request.GET.order == "price_desc" %}<span class="badge coral">Tri: Prix ↓</span>{% endif %}
+  <div class="section" style="margin-top:10px">
+    <div class="pl-badges">
+      {% if request.GET.q %}<span class="pl-badge">Recherche: “{{ request.GET.q }}”</span>{% endif %}
+      {% if request.GET.order == "new" %}<span class="pl-badge">Tri: Nouveautés</span>{% endif %}
+      {% if request.GET.order == "price_asc" %}<span class="pl-badge">Tri: Prix ↑</span>{% endif %}
+      {% if request.GET.order == "price_desc" %}<span class="pl-badge">Tri: Prix ↓</span>{% endif %}
     </div>
   </div>
 {% endif %}
 
-<div class="grid">
+<div class="pl-grid">
   {% for p in page_obj %}
-    {# Liseré haut coloré cyclé #}
-    {% cycle 'indigo' 'gold' 'coral' 'emerald' as edgecolor %}
-    <div class="card" style="border-top:4px solid var(--{{ edgecolor }})">
-      <a href="{% url 'product_detail' p.slug %}">
+    <a class="p-card" href="{% url 'product_detail' p.slug %}" aria-label="Voir {{ p.name }}">
+      <div class="p-media">
         {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}" loading="lazy">{% endif %}
-        <div class="card-body">
-          <div style="font-weight:800">{{ p.name }}</div>
-          {% if p.category %}<div class="muted" style="margin:6px 0">{{ p.category.name }}</div>{% endif %}
-          <div class="price">{{ p.price|intcomma }} FCFA</div>
+        <span class="p-price">{{ p.price|intcomma }} FCFA</span>
+        <span class="p-grad" aria-hidden="true"></span>
+        <div class="p-name">{{ p.name }}</div>
+      </div>
+      <div class="p-body">
+        <div class="p-meta">
+          {% if p.category %}<span class="cat-badge">{{ p.category.name }}</span>{% endif %}
+          <span class="slug" title="{{ p.slug }}">{{ p.slug }}</span>
         </div>
-      </a>
-    </div>
+      </div>
+    </a>
   {% empty %}
     <p class="muted">Aucun article ne correspond à votre recherche.</p>
   {% endfor %}
 </div>
 
 {% if is_paginated %}
-  <div class="section pagination">
+  <div class="section pl-pag" style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">
     {% if page_obj.has_previous %}
-      <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ page_obj.previous_page_number }}">Précédent</a>
+      <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ page_obj.previous_page_number }}">Précédent</a>
     {% endif %}
     {% for num in paginator.page_range %}
       {% if num == page_obj.number %}
         <span class="page active">{{ num }}</span>
       {% elif num > page_obj.number|add:-2 and num < page_obj.number|add:2 %}
-        <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ num }}">{{ num }}</a>
+        <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ num }}">{{ num }}</a>
       {% endif %}
     {% endfor %}
     {% if page_obj.has_next %}
-      <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ page_obj.next_page_number }}">Suivant</a>
+      <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ page_obj.next_page_number }}">Suivant</a>
     {% endif %}
   </div>
 {% endif %}

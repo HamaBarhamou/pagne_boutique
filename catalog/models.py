@@ -33,7 +33,7 @@ class Product(models.Model):
 
 class BusinessSetting(models.Model):
     name = models.CharField(
-        "Nom de la boutique", max_length=120, default="Pagne Boutique"
+        "Nom de la boutique", max_length=120, default="ABH – Compagny"
     )
     tagline = models.CharField(
         "Slogan",
