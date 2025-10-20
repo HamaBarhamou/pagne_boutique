@@ -1,10 +1,12 @@
+{% load humanize %}
+
 <div class="card">
   <a href="{% url 'product_detail' p.slug %}">
     {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}" loading="lazy">{% endif %}
     <div class="card-body">
       <div style="font-weight:800">{{ p.name }}</div>
       {% if p.category %}<div class="muted" style="margin:6px 0">{{ p.category.name }}</div>{% endif %}
-      <div class="price">{{ p.price }} FCFA</div>
+      <div class="price">{{ p.price|intcomma }} FCFA</div>
     </div>
   </a>
 </div>

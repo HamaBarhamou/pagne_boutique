@@ -6,81 +6,117 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{% block title %}{{ BUSINESS_NAME }} — {{ BUSINESS_TAGLINE|default:"Boutique de pagnes à Niamey" }}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ BUSINESS_NAME }}: pagnes Wax, Bazin, Brodés — qualité, prix justes, service réactif à Niamey.{% endblock %}">
-  <meta name="theme-color" content="#0a0a0a">
-  <!-- OpenGraph -->
-  <meta property="og:title" content="{% block og_title %}{{ BUSINESS_NAME }}{% endblock %}">
-  <meta property="og:description" content="{% block og_desc %}{{ BUSINESS_TAGLINE|default:'Pagne boutique — qualité & style' }}{% endblock %}">
+  <meta name="theme-color" content="#faf7f2">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ request.build_absolute_uri|default:'' }}">
-  <meta property="og:image" content="{% block og_image %}{% static 'img/og-default.jpg' %}{% endblock %}">
-  <style>
-    :root{
-      --bg:#0b0b0b;--fg:#111;--muted:#6b7280;--card:#fff;--brand:#0a0a0a;--brand-2:#f59e0b;
-      --ring:rgba(0,0,0,.08)
-    }
-    @media (prefers-color-scheme: dark){
-      :root{--fg:#fafafa;--bg:#0a0a0a;--card:#111;--muted:#9ca3af;--ring:rgba(255,255,255,.1)}
-      header,footer{background:#0a0a0a}
-    }
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;margin:0;background:#f7f7f8;color:var(--fg)}
-    a{color:inherit;text-decoration:none}
-    img{max-width:100%;display:block}
-    .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
-    /* Header */
-    header{position:sticky;top:0;z-index:50;background:#ffffffee;backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--ring)}
-    .topbar{display:flex;align-items:center;justify-content:space-between;height:64px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
-    nav a{margin-left:16px;padding:8px 10px;border-radius:10px}
-    nav a:hover{background:var(--ring)}
-    /* Layout */
-    main{padding:24px 0}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.04)}
-    .card-body{padding:12px}
-    .price{font-weight:800}
-    .muted{color:var(--muted)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--brand);color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;border:1px solid #000;transition:transform .06s ease}
-    .btn:hover{transform:translateY(-1px)}
-    .btn-outline{background:transparent;color:var(--fg);border:1px solid var(--ring)}
-    .btn-ghost{background:transparent}
-    .hero{border-radius:20px;background:linear-gradient(135deg,#fff, #fdf6e5);border:1px solid var(--ring);padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.05)}
-    .section{margin:28px 0}
-    .breadcrumbs{display:flex;gap:8px;align-items:center;font-size:14px}
-    .breadcrumbs a{color:var(--muted)}
-    /* Footer */
-    footer{border-top:1px solid var(--ring);background:#fff}
-    .foot{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;padding:22px 0}
-    .copy{padding:14px 0;border-top:1px solid var(--ring);font-size:14px;color:var(--muted)}
-    /* Floating WhatsApp */
-    .float-wa{position:fixed;right:16px;bottom:16px;background:#25D366;color:#fff;padding:14px 18px;border-radius:999px;
-      font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-    /* Forms */
-    input,select{height:42px;border-radius:10px;border:1px solid var(--ring);padding:0 12px;background:#fff}
-    /* Product */
-    .p-gallery{display:grid;grid-template-columns:1fr;gap:14px}
-    @media (min-width:900px){.p-layout{display:grid;grid-template-columns:1fr 1fr;gap:28px}.p-gallery{grid-template-columns:repeat(2,1fr)}}
-    .badge{display:inline-block;background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;font-size:12px}
-    .pill{display:inline-block;background:#111;color:#fff;padding:6px 10px;border-radius:999px;font-size:12px}
-    /* Pagination */
-    .pagination{display:flex;gap:6px;flex-wrap:wrap}
-    .page{padding:8px 12px;border:1px solid var(--ring);border-radius:10px;background:#fff}
-    .page.active{background:var(--brand);color:#fff;border-color:#000}
-  </style>
-  {% block extra_head %}{% endblock %}
+
+<style>
+  :root{
+    --bg:#faf7f2;        /* ivoire clair */
+    --fg:#1a1a1a;
+    --muted:#6b6b6b;
+    --card:#ffffff;
+    --surface:#fffaf0;
+    --ring:rgba(30,30,30,.08);
+
+    --indigo:#233B8F;
+    --gold:#C98C17;
+    --coral:#D7514D;
+    --emerald:#1E8F6E;
+
+    --brand:var(--indigo);
+    --brand-contrast:#ffffff;
+    --brand-border:rgba(0,0,0,.18);
+    --brand-ghost:rgba(35,59,143,.12);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+    background:var(--bg);
+    color:var(--fg);
+    line-height:1.45;
+  }
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%;display:block}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+  main{padding:26px 0}
+  .section{margin:28px 0}
+
+  header{
+    position:sticky;top:0;z-index:50;
+    background:var(--surface);
+    border-bottom:1px solid var(--ring);
+    backdrop-filter:saturate(160%) blur(6px);
+  }
+  .topbar{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .nav{display:flex;gap:14px}
+  .nav .link{padding:8px 10px;border-radius:10px}
+  .nav .link:hover{background:var(--ring)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;
+       border-radius:12px;font-weight:700;border:1px solid transparent;cursor:pointer;
+       transition:transform .06s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.primary{background:var(--brand);color:var(--brand-contrast);border-color:var(--brand-border)}
+  .btn.outline{background:transparent;color:var(--brand);border-color:var(--brand-border)}
+  .btn.ghost{background:var(--brand-ghost);color:var(--brand-contrast)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--ring);border-radius:16px;overflow:hidden;
+        box-shadow:0 8px 24px rgba(0,0,0,.05);transition:transform .12s, box-shadow .12s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.08)}
+  .card-body{padding:12px}
+  .price{font-weight:800}
+  .muted{color:var(--muted)}
+
+  footer{border-top:1px solid var(--ring);background:var(--surface)}
+  .foot{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;padding:22px 0}
+  .copy{padding:14px 0;border-top:1px solid var(--ring);font-size:14px;color:var(--muted)}
+
+  .float-wa{
+    position:fixed;right:16px;bottom:16px;
+    background:#25D366;color:#fff;padding:14px 18px;border-radius:999px;
+    font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.18)
+  }
+  /* ---------- Hero (clair, sans dark mode) ---------- */
+.hero{
+  position:relative; overflow:hidden;
+  border-radius:22px; padding:28px; border:1px solid var(--ring);
+  color:#fff;
+  /* dégradé indigo -> émeraude, lumineux mais pas agressif */
+  background:linear-gradient(135deg, rgba(35,59,143,.96), rgba(30,143,110,.92));
+}
+.hero:before{
+  content:""; position:absolute; inset:0; opacity:.35; pointer-events:none;
+  background:
+    url("data:image/svg+xml;utf8,\
+    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>\
+      <g fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='0.8'>\
+        <path d='M0 12 L6 6 L12 12 L18 6 L24 12'/>\
+        <path d='M0 24 L6 18 L12 24 L18 18 L24 24'/>\
+      </g>\
+    </svg>");
+  background-size:24px 24px;
+}
+.hero > *{position:relative}
+
+</style>
 </head>
+
 <body>
 <header>
   <div class="wrap topbar">
     <a href="/" class="brand">
-      <img src="{% static 'img/logo.svg' %}" alt="logo" width="28" height="28" loading="lazy">
+      <img src="{% static 'img/logo.svg' %}" width="28" height="28" alt="">
       <span>{{ BUSINESS_NAME }}</span>
     </a>
-    <nav>
-      <a href="/">Accueil</a>
-      <a href="/a-propos/">À propos</a>
-      <a href="/contact/">Contact</a>
-      <a href="https://wa.me/{{ BUSINESS_WHATSAPP }}" target="_blank" class="btn">Commander</a>
+    <nav class="nav">
+      <a href="/" class="link">Accueil</a>
+      <a href="/a-propos/" class="link">À propos</a>
+      <a href="/contact/" class="link">Contact</a>
+      <a href="https://wa.me/{{ BUSINESS_WHATSAPP }}" target="_blank" class="btn primary">Commander</a>
     </nav>
   </div>
 </header>
@@ -101,32 +137,17 @@
     </div>
     <div>
       <div class="muted">Suivre / Commander</div><br>
-      <a class="btn btn-outline" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}">WhatsApp</a>
-      {% if BUSINESS_INSTAGRAM %} <a class="btn btn-ghost" target="_blank" href="{{ BUSINESS_INSTAGRAM }}">Instagram</a>{% endif %}
+      <a class="btn outline" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}">WhatsApp</a>
+      {% if BUSINESS_INSTAGRAM %}<a class="btn ghost" target="_blank" href="{{ BUSINESS_INSTAGRAM }}">Instagram</a>{% endif %}
     </div>
   </div>
   <div class="wrap copy">
-    © {{ now|date:"Y" }} {{ BUSINESS_NAME }} — Tous droits réservés.
+    © {% now "Y" %} {{ BUSINESS_NAME }} — Tous droits réservés.
   </div>
 </footer>
 
 {% block floating %}
   <a class="float-wa" href="https://wa.me/{{ BUSINESS_WHATSAPP }}" target="_blank">WhatsApp</a>
 {% endblock %}
-
-<!-- LocalBusiness JSON-LD -->
-<script type="application/ld+json">
-{
- "@context":"https://schema.org",
- "@type":"Store",
- "name":"{{ BUSINESS_NAME|escapejs }}",
- "address":"{{ BUSINESS_ADDRESS|escapejs }}",
- "telephone":"{{ BUSINESS_PHONE|escapejs }}",
- "openingHours":"{{ BUSINESS_HOURS|escapejs }}",
- "url":"{{ request.build_absolute_uri|default:''|escapejs }}"
-}
-</script>
-
-{% block extra_scripts %}{% endblock %}
 </body>
 </html>

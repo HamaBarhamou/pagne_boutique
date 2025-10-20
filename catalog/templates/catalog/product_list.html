@@ -3,30 +3,60 @@
 {% block title %}{{ current_category.name|default:"Produits" }} — {{ BUSINESS_NAME }}{% endblock %}
 
 {% block breadcrumbs %}
-<nav class="breadcrumbs">
+<nav class="breadcrumbs wrap" style="margin-top:8px">
   <a href="/">Accueil</a> ›
   <span>{{ current_category.name|default:"Produits" }}</span>
 </nav>
 {% endblock %}
 
 {% block content %}
-<div class="section" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-  <h1 style="margin:0">{{ current_category.name|default:"Tous les produits" }}</h1>
-  <form method="get" action="" style="display:flex;gap:8px">
-    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un pagne…">
-    <select name="order">
+<section class="section" style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap">
+  <div>
+    <h1 style="margin:0">{{ current_category.name|default:"Tous les produits" }}</h1>
+    <div class="muted" style="margin-top:6px">{{ paginator.count|default:page_obj.paginator.count }} article{{ paginator.count|default:page_obj.paginator.count|pluralize:",s" }}</div>
+  </div>
+
+  <!-- Barre de filtres -->
+  <form method="get" action="" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un pagne…" aria-label="Recherche" style="height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)">
+    <select name="order" aria-label="Tri" style="height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)">
       <option value="">Trier</option>
       <option value="new" {% if request.GET.order == "new" %}selected{% endif %}>Nouveautés</option>
       <option value="price_asc" {% if request.GET.order == "price_asc" %}selected{% endif %}>Prix ↑</option>
       <option value="price_desc" {% if request.GET.order == "price_desc" %}selected{% endif %}>Prix ↓</option>
     </select>
-    <button class="btn" type="submit">Filtrer</button>
+    <button class="btn primary" type="submit">Appliquer</button>
+    {% if request.GET.q or request.GET.order %}
+      <a class="btn outline" href=".">Réinitialiser</a>
+    {% endif %}
   </form>
-</div>
+</section>
+
+{% if request.GET.q or request.GET.order %}
+  <div class="section" style="margin-top:0">
+    <div class="badges">
+      {% if request.GET.q %}<span class="badge gold">Recherche: “{{ request.GET.q }}”</span>{% endif %}
+      {% if request.GET.order == "new" %}<span class="badge indigo">Tri: Nouveautés</span>{% endif %}
+      {% if request.GET.order == "price_asc" %}<span class="badge emerald">Tri: Prix ↑</span>{% endif %}
+      {% if request.GET.order == "price_desc" %}<span class="badge coral">Tri: Prix ↓</span>{% endif %}
+    </div>
+  </div>
+{% endif %}
 
 <div class="grid">
   {% for p in page_obj %}
-    {% include "catalog/_product_card.html" with p=p %}
+    {# Liseré haut coloré cyclé #}
+    {% cycle 'indigo' 'gold' 'coral' 'emerald' as edgecolor %}
+    <div class="card" style="border-top:4px solid var(--{{ edgecolor }})">
+      <a href="{% url 'product_detail' p.slug %}">
+        {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}" loading="lazy">{% endif %}
+        <div class="card-body">
+          <div style="font-weight:800">{{ p.name }}</div>
+          {% if p.category %}<div class="muted" style="margin:6px 0">{{ p.category.name }}</div>{% endif %}
+          <div class="price">{{ p.price|intcomma }} FCFA</div>
+        </div>
+      </a>
+    </div>
   {% empty %}
     <p class="muted">Aucun article ne correspond à votre recherche.</p>
   {% endfor %}

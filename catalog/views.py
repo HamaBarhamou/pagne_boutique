@@ -3,11 +3,13 @@ from urllib.parse import quote
 from django.conf import settings
 from .models import Category, Product
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 def _wa_link(text: str):
     phone = getattr(settings, "BUSINESS_WHATSAPP", "") or ""
     return f"https://wa.me/{phone}?text={quote(text)}" if phone else None
+
 
 def home(request):
     categories = Category.objects.all()[:8]
@@ -18,6 +20,7 @@ def home(request):
         "home.html",
         {"categories": categories, "products": products, "hero_cta": hero_cta},
     )
+
 
 def product_list(request, slug):
     category = get_object_or_404(Category, slug=slug)
@@ -51,6 +54,7 @@ def product_list(request, slug):
         },
     )
 
+
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
     wa = _wa_link(f"Bonjour, je veux le pagne: {product.name} ({product.price} FCFA).")
@@ -65,6 +69,7 @@ def product_detail(request, slug):
         "catalog/product_detail.html",
         {"product": product, "wa": wa, "related_products": related},
     )
+
 
 def about(request):
     wa = _wa_link("Bonjour, je veux des informations sur votre boutique.")

@@ -3,7 +3,7 @@
 {% block title %}{{ product.name }} — {{ BUSINESS_NAME }}{% endblock %}
 
 {% block breadcrumbs %}
-<nav class="breadcrumbs">
+<nav class="breadcrumbs wrap" style="margin-top:8px">
   <a href="/">Accueil</a> ›
   {% if product.category %}<a href="{% url 'product_list' product.category.slug %}">{{ product.category.name }}</a> ›{% endif %}
   <span>{{ product.name }}</span>
@@ -11,45 +11,70 @@
 {% endblock %}
 
 {% block content %}
-<div class="p-layout">
-  <div>
-    <div class="p-gallery">
-      {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}
-      {% if product.thumbnail and not product.image %}<img src="{{ product.thumbnail.url }}" alt="{{ product.name }}">{% endif %}
-      {% for img in product.images.all %}
-        <img src="{{ img.image.url }}" alt="{{ product.name }} - {{ forloop.counter }}">
-      {% endfor %}
+<section class="section" style="display:grid;grid-template-columns:1fr;gap:28px">
+  <!-- Bandeau produit (clair, sans fond noir) -->
+  <div class="hero" style="
+      color:#fff;
+      background:linear-gradient(135deg, rgba(35,59,143,.96), rgba(30,143,110,.92));
+      padding:22px;border-radius:18px;">
+    <div style="position:relative; z-index:1;">
+      <h1 style="margin:0 0 6px">{{ product.name }}</h1>
+      {% if product.category %}<div style="opacity:.9">{{ product.category.name }}</div>{% endif %}
+      <div style="margin-top:10px;font-size:22px;font-weight:800">{{ product.price|intcomma }} FCFA</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <a class="btn primary" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}?text={{ product.name|urlencode }}%20—%20{{ request.build_absolute_uri|urlencode }}">Commander sur WhatsApp</a>
+        <a class="btn outline" href="javascript:history.back()">Retour</a>
+      </div>
     </div>
   </div>
-  <div>
-    <h1 style="margin-top:0">{{ product.name }}</h1>
-    {% if product.category %}<div class="muted" style="margin:6px 0">{{ product.category.name }}</div>{% endif %}
-    <div class="price" style="font-size:22px;margin:10px 0">{{ product.price|intcomma }} FCFA</div>
 
-    {% if product.short_description %}
-      <p>{{ product.short_description }}</p>
-    {% endif %}
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0">
-      <a class="btn" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}?text={{ product.name|urlencode }}%20—%20{{ request.build_absolute_uri|urlencode }}">Commander sur WhatsApp</a>
-      <a class="btn btn-outline" href="javascript:history.back()">Retour</a>
+  <!-- Contenu -->
+  <div class="p-layout">
+    <div>
+      <div class="p-gallery">
+        {% if product.thumbnail %}<img src="{{ product.thumbnail.url }}" alt="{{ product.name }}">{% endif %}
+        {% if product.image and not product.thumbnail %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}
+        {# slot pour d'éventuelles images multiples si tu ajoutes un related_name images #}
+      </div>
     </div>
 
-    {% if product.details %}
-      <h3>Détails</h3>
-      <div>{{ product.details|linebreaks }}</div>
-    {% endif %}
-
-    {% if related_products %}
-      <div class="section">
-        <h3>Vous aimerez aussi</h3>
-        <div class="grid">
-          {% for p in related_products %}
-            {% include "catalog/_product_card.html" with p=p %}
-          {% endfor %}
+    <div>
+      {% if product.short_description %}
+        <h3 style="margin:0 0 8px">Description courte</h3>
+        <p>{{ product.short_description }}</p>
+      {% endif %}
+      {% if product.details %}
+        <h3 style="margin:18px 0 8px">Détails</h3>
+        <div>{{ product.details|linebreaks }}</div>
+      {% endif %}
+      <div class="section" style="margin-top:18px">
+        <div class="badges">
+          {% if product.category %}<span class="badge gold">Catégorie: {{ product.category.name }}</span>{% endif %}
+          <span class="badge indigo">Disponible</span>
         </div>
       </div>
-    {% endif %}
+    </div>
   </div>
-</div>
+
+  {% if related_products %}
+    <div class="section">
+      <h3>Vous aimerez aussi</h3>
+      <div class="grid">
+        {% for p in related_products %}
+          {% cycle 'indigo' 'gold' 'coral' 'emerald' as edgecolor %}
+          <div class="card" style="border-top:4px solid var(--{{ edgecolor }})">
+            <a href="{% url 'product_detail' p.slug %}">
+              {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}" loading="lazy">{% endif %}
+              <div class="card-body">
+                <div style="font-weight:800">{{ p.name }}</div>
+                {% if p.category %}<div class="muted" style="margin:6px 0">{{ p.category.name }}</div>{% endif %}
+                <div class="price">{{ p.price|intcomma }} FCFA</div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</section>
 {% endblock %}

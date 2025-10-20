@@ -1,5 +1,6 @@
 from .models import BusinessSetting
 
+
 def business_context(request):
     s = BusinessSetting.get_solo()
     return {
