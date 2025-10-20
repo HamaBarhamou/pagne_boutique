@@ -2,67 +2,206 @@
 {% load humanize %}
 {% block title %}Produits — Espace staff{% endblock %}
 
-{% block content %}
+{% block extra_head %}
 <style>
-  .tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden}
-  .tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--ring);text-align:left}
-  .tbl th{background:var(--surface);font-weight:700}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px}
+  /* ====== Layout & Toolbar ====== */
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px
+  }
+  .toolbar-left{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .toolbar-right{display:flex;gap:8px;flex-wrap:wrap}
+  .subtle{color:var(--muted);font-size:13px}
   .inp{height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)}
-  .k{font-size:12px;color:var(--muted)}
-</style>
 
+  /* ====== Table Pro ====== */
+  .tbl-wrap{border:1px solid var(--ring);border-radius:14px;overflow:hidden;background:var(--card)}
+  .tbl{width:100%;border-collapse:separate;border-spacing:0}
+  .tbl th,.tbl td{padding:12px 14px;border-bottom:1px solid var(--ring);text-align:left;vertical-align:middle}
+  .tbl thead th{background:var(--surface);font-weight:700;position:sticky;top:0;z-index:1}
+  .tbl tbody tr{transition:background .12s ease}
+  .tbl tbody tr:nth-child(even){background:rgba(0,0,0,.015)}
+  .tbl tbody tr:hover{background:rgba(0,0,0,.03)}
+  .thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#eee;flex:0 0 44px}
+  .sku{font-size:12px;color:var(--muted)}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+  .pill.ok{background:var(--emerald);color:#fff}
+  .pill.off{background:var(--coral);color:#fff}
+
+  /* ====== Row primary link (tout clique ouvre l’édition) ====== */
+  .rowlink{display:flex;align-items:center;gap:12px;color:inherit}
+  .rowlink:focus{outline:2px solid var(--ring);border-radius:10px}
+
+  /* ====== Actions discrètes ====== */
+  .actions{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+  .iconbtn{
+    width:36px;height:36px;border-radius:10px;border:1px solid var(--ring);
+    background:var(--card);display:inline-flex;align-items:center;justify-content:center;
+    transition:transform .06s ease, background .06s ease, border-color .06s ease; position:relative
+  }
+  .iconbtn:hover{transform:translateY(-1px);background:#fff}
+  .iconbtn .icon{width:18px;height:18px}
+  .iconbtn[data-variant="primary"]{background:var(--brand-ghost);border-color:transparent}
+  .iconbtn[data-variant="danger"]{background:#feeceb;border-color:#f5c2be}
+  .iconbtn[data-variant="toggle"]{background:#eef8f4;border-color:#cfe7df}
+
+  /* Tooltips */
+  .iconbtn[data-tip]:hover::after{
+    content:attr(data-tip);
+    position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+    background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;white-space:nowrap
+  }
+
+  /* ====== Menu d’actions au survol (mobile: reste visible) ====== */
+  .cell-actions{min-width:200px}
+  /* ====== Actions toujours visibles ====== */
+@media (min-width: 861px){
+  .cell-actions .actions{
+    opacity:1;
+    pointer-events:auto;
+    transition:opacity .12s ease;
+  }
+}
+
+
+  /* ====== Responsive: table → cartes ====== */
+  @media (max-width: 860px){
+    .tbl thead{display:none}
+    .tbl, .tbl tbody, .tbl tr, .tbl td{display:block;width:100%}
+    .tbl tr{border-bottom:1px solid var(--ring);padding:10px 0}
+    .tbl td{border:none;padding:6px 14px}
+    .tbl td[data-label]:before{content:attr(data-label);display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+    .cell-actions{padding:8px 14px}
+  }
+
+  /* ====== Modal (confirmation suppression) ====== */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
+  .modal[open]{display:flex}
+  .modal-card{background:var(--card);border:1px solid var(--ring);border-radius:16px;max-width:420px;width:100%;padding:18px}
+</style>
+{% endblock %}
+
+{% block content %}
 <section class="section">
   <div class="toolbar">
-    <h1 style="margin:0">Produits</h1>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div class="toolbar-left">
+      <h1 style="margin:0">Produits</h1>
+      <span class="subtle">{{ page_obj.paginator.count }} article{{ page_obj.paginator.count|pluralize:",s" }}</span>
+    </div>
+
+    <div class="toolbar-right">
       <form method="get" style="display:flex;gap:8px">
-        <input class="inp" type="search" name="q" value="{{ q }}" placeholder="Rechercher…">
+        <input class="inp" type="search" name="q" value="{{ q }}" placeholder="Rechercher par nom, slug, catégorie…">
         <button class="btn outline" type="submit">Rechercher</button>
       </form>
-      <a class="btn primary" href="{% url 'staff_product_create' %}">Nouveau produit</a>
+      <a class="btn primary" href="{% url 'staff_product_create' %}">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width:18px;height:18px">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Nouveau
+      </a>
     </div>
   </div>
 
-  <div class="k">{{ page_obj.paginator.count }} produit{{ page_obj.paginator.count|pluralize:",s" }}</div>
-
-  <div class="tbl-wrap" style="margin-top:10px">
+  <div class="tbl-wrap">
     <table class="tbl">
       <thead>
         <tr>
-          <th>Produit</th>
+          <th style="width:44%">Produit</th>
           <th>Catégorie</th>
           <th>Prix</th>
-          <th>Actif</th>
-          <th style="width:220px">Actions</th>
+          <th>Statut</th>
+          <th class="cell-actions" style="width:220px;text-align:right">Actions</th>
         </tr>
       </thead>
       <tbody>
       {% for p in page_obj %}
         <tr>
-          <td>
-            <div style="display:flex;align-items:center;gap:10px">
-              {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" width="44" height="44" style="border-radius:8px;object-fit:cover">{% endif %}
+          <td data-label="Produit">
+            <a class="rowlink" href="{% url 'staff_product_edit' p.pk %}" aria-label="Éditer {{ p.name }}">
+              {% if p.thumbnail %}
+                <img src="{{ p.thumbnail.url }}" class="thumb" alt="{{ p.name }}">
+              {% else %}
+                <div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#bbb">—</div>
+              {% endif %}
               <div>
                 <div style="font-weight:700">{{ p.name }}</div>
-                <div class="k">{{ p.slug }}</div>
+                <div class="sku">{{ p.slug }}</div>
               </div>
-            </div>
+            </a>
           </td>
-          <td>{{ p.category.name }}</td>
-          <td>{{ p.price|intcomma }} FCFA</td>
-          <td>{% if p.is_active %}<span class="badge emerald">Actif</span>{% else %}<span class="badge coral">Inactif</span>{% endif %}</td>
-          <td>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <a class="btn outline" href="{% url 'product_detail' p.slug %}" target="_blank">Voir</a>
-              <a class="btn outline" href="{% url 'staff_product_edit' p.pk %}">Éditer</a>
-              <a class="btn ghost" href="{% url 'staff_product_toggle' p.pk %}">{% if p.is_active %}Désactiver{% else %}Activer{% endif %}</a>
-              <a class="btn" style="background:#b42318;color:#fff" href="{% url 'staff_product_delete' p.pk %}">Supprimer</a>
+
+          <td data-label="Catégorie">{{ p.category.name }}</td>
+          <td data-label="Prix">{{ p.price|intcomma }} FCFA</td>
+          <td data-label="Statut">
+            {% if p.is_active %}
+              <span class="pill ok">Actif</span>
+            {% else %}
+              <span class="pill off">Inactif</span>
+            {% endif %}
+          </td>
+
+          <td data-label="Actions" class="cell-actions">
+            <div class="actions">
+              <!-- Voir (même page, pas de target=_blank) -->
+              <a class="iconbtn" href="{% url 'product_detail' p.slug %}" data-tip="Voir">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 5c5 0 9 7 9 7s-4 7-9 7-9-7-9-7 4-7 9-7Zm0 4a3 3 0 1 0 .001 6.001A3 3 0 0 0 12 9Z" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+              </a>
+
+              <!-- Éditer -->
+              <a class="iconbtn" href="{% url 'staff_product_edit' p.pk %}" data-tip="Éditer" data-variant="primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 15.5V20h4.5L19 9.5l-4.5-4.5L4 15.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                </svg>
+              </a>
+
+              <!-- Activer/Désactiver (POST) -->
+              <form method="post" action="{% url 'staff_product_toggle' p.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button class="iconbtn" type="submit" data-tip="{% if p.is_active %}Désactiver{% else %}Activer{% endif %}" data-variant="toggle" aria-label="{% if p.is_active %}Désactiver{% else %}Activer{% endif %}">
+                  {% if p.is_active %}
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M7 12a5 5 0 0 0 10 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  {% else %}
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 7a5 5 0 0 1 0 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                  {% endif %}
+                </button>
+              </form>
+
+              <!-- Supprimer → modal -->
+              <button class="iconbtn" data-tip="Supprimer" data-variant="danger" data-open="#modal-{{ p.pk }}" aria-haspopup="dialog" aria-controls="modal-{{ p.pk }}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 7h14M9 7l1-2h4l1 2m-8 0 1 12h6l1-12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal de confirmation (un par ligne) -->
+            <div class="modal" id="modal-{{ p.pk }}" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ p.pk }}">
+              <div class="modal-card">
+                <h3 id="modal-title-{{ p.pk }}" style="margin:0 0 8px">Supprimer le produit</h3>
+                <p class="subtle" style="margin:0 0 12px">Voulez-vous vraiment supprimer <strong>{{ p.name }}</strong> ? Cette action est irréversible.</p>
+                <form method="post" action="{% url 'staff_product_delete' p.pk %}" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                  {% csrf_token %}
+                  <button type="button" class="btn outline" data-close="#modal-{{ p.pk }}">Annuler</button>
+                  <button type="submit" class="btn" style="background:#b42318;color:#fff;border:1px solid rgba(0,0,0,.2)">Supprimer</button>
+                </form>
+              </div>
             </div>
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="5" class="k" style="text-align:center">Aucun produit.</td></tr>
+        <tr>
+          <td colspan="5" style="text-align:center;padding:22px">
+            <div class="subtle">Aucun produit pour le moment.</div>
+          </td>
+        </tr>
       {% endfor %}
       </tbody>
     </table>
@@ -86,4 +225,25 @@
     </div>
   {% endif %}
 </section>
+
+<script>
+  // Ouvre/ferme les modals de confirmation (sans dépendance)
+  document.addEventListener('click', function(e){
+    const openBtn = e.target.closest('[data-open]');
+    const closeBtn = e.target.closest('[data-close]');
+    if(openBtn){
+      const sel = openBtn.getAttribute('data-open');
+      const modal = document.querySelector(sel);
+      if(modal){ modal.setAttribute('open',''); }
+    }
+    if(closeBtn){
+      const sel = closeBtn.getAttribute('data-close');
+      const modal = document.querySelector(sel);
+      if(modal){ modal.removeAttribute('open'); }
+    }
+    // fermer en cliquant l'overlay
+    const modalBg = e.target.classList.contains('modal');
+    if(modalBg){ e.target.removeAttribute('open'); }
+  }, {passive:true});
+</script>
 {% endblock %}
