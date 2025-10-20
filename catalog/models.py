@@ -29,3 +29,45 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BusinessSetting(models.Model):
+    name = models.CharField(
+        "Nom de la boutique", max_length=120, default="Pagne Boutique"
+    )
+    tagline = models.CharField(
+        "Slogan",
+        max_length=160,
+        blank=True,
+        default="La sélection de pagnes qui font la différence",
+    )
+    address = models.CharField(
+        "Adresse", max_length=200, blank=True, default="Niamey, Niger"
+    )
+    phone = models.CharField(
+        "Téléphone", max_length=40, blank=True, default="+227 xx xx xx xx"
+    )
+    whatsapp = models.CharField(
+        "WhatsApp (numéro au format international, ex: 227xxxxxxxx)",
+        max_length=30,
+        blank=True,
+        default="",
+    )
+    hours = models.CharField(
+        "Horaires", max_length=120, blank=True, default="Lun–Sam 9h–19h"
+    )
+    instagram = models.URLField("Lien Instagram", blank=True, default="")
+
+    class Meta:
+        verbose_name = "Réglages boutique"
+        verbose_name_plural = "Réglages boutique"
+
+    def __str__(self):
+        return "Réglages boutique"
+
+    @classmethod
+    def get_solo(cls):
+        obj = cls.objects.first()
+        if obj is None:
+            obj = cls.objects.create()
+        return obj

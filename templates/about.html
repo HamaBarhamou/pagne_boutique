@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 {% block title %}À propos — {{ BUSINESS_NAME }}{% endblock %}
 {% block content %}
-<h2>À propos</h2>
-<p>{{ BUSINESS_NAME }} est spécialisé dans la vente de pagnes (Wax, Bazin, Brodés) à Niamey.</p>
-<ul>
-  <li>Qualité garantie</li>
-  <li>Prix compétitifs</li>
-  <li>Service client réactif</li>
-</ul>
-{% if wa %}<p><a class="btn" target="_blank" href="{{ wa }}">📲 Nous écrire sur WhatsApp</a></p>{% endif %}
+<div class="hero">
+  <h2 style="margin:0 0 8px">À propos</h2>
+  <p>{{ BUSINESS_NAME }} est spécialisé dans la vente de pagnes (Wax, Bazin, Brodés) à Niamey, avec un sourcing exigeant et un contrôle qualité continu.</p>
+  <ul>
+    <li>Qualité garantie</li>
+    <li>Prix compétitifs</li>
+    <li>Service client réactif</li>
+  </ul>
+  <div style="margin-top:8px">
+    <a class="btn" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}">Nous écrire sur WhatsApp</a>
+  </div>
+</div>
 {% endblock %}

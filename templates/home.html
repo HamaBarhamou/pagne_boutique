@@ -1,30 +1,34 @@
 {% extends 'base.html' %}
+{% block title %}{{ BUSINESS_NAME }} — {{ BUSINESS_TAGLINE }}{% endblock %}
 {% block content %}
-<section style="text-align:center;margin-bottom:18px">
-  <h1 style="margin:8px 0">{{ BUSINESS_TAGLINE }}</h1>
-  {% if hero_cta %}<a class="btn" href="{{ hero_cta }}" target="_blank">📲 Commander sur WhatsApp</a>{% endif %}
+<section class="hero">
+  <h1 style="margin:0;font-size:28px">{{ BUSINESS_TAGLINE }}</h1>
+  <p class="muted" style="margin:8px 0 16px">Wax, Bazin, Brodés — Sélection soignée, arrivages réguliers.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    {% if hero_cta %}<a class="btn" href="{{ hero_cta }}" target="_blank">Commander sur WhatsApp</a>{% endif %}
+    <a class="btn btn-outline" href="{% url 'product_list' 'nouveautes' %}">Voir les nouveautés</a>
+  </div>
 </section>
 
 {% if categories %}
-<h2>Catégories</h2>
-<p>
-  {% for c in categories %}
-    <a class="btn" href="{% url 'product_list' c.slug %}">{{ c.name }}</a>
-  {% endfor %}
-</p>
+<div class="section">
+  <h2 style="margin:0 0 10px">Catégories</h2>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    {% for c in categories %}
+      <a class="badge" href="{% url 'product_list' c.slug %}">{{ c.name }}</a>
+    {% endfor %}
+  </div>
+</div>
 {% endif %}
 
-<h2>Nouveautés</h2>
-<div class="grid">
-  {% for p in products %}
-  <a class="card" href="{% url 'product_detail' p.slug %}">
-    {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}">{% endif %}
-    <div style="font-weight:700;margin-top:6px">{{ p.name }}</div>
-    <div style="margin-top:4px">{{ p.price }} FCFA</div>
-    <div><span class="btn">👀 Voir</span></div>
-  </a>
-  {% empty %}
-  <p>Aucun produit pour le moment.</p>
-  {% endfor %}
+<div class="section">
+  <h2 style="margin:0 0 10px">Nouveautés</h2>
+  <div class="grid">
+    {% for p in products %}
+      {% include "catalog/_product_card.html" with p=p %}
+    {% empty %}
+      <p class="muted">Aucun produit pour le moment.</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

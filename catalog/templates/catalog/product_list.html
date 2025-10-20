@@ -1,17 +1,52 @@
 {% extends 'base.html' %}
-{% block title %}{{ category.name }} — {{ BUSINESS_NAME }}{% endblock %}
+{% load humanize %}
+{% block title %}{{ current_category.name|default:"Produits" }} — {{ BUSINESS_NAME }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav class="breadcrumbs">
+  <a href="/">Accueil</a> ›
+  <span>{{ current_category.name|default:"Produits" }}</span>
+</nav>
+{% endblock %}
+
 {% block content %}
-<h2>🗂️ {{ category.name }}</h2>
+<div class="section" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+  <h1 style="margin:0">{{ current_category.name|default:"Tous les produits" }}</h1>
+  <form method="get" action="" style="display:flex;gap:8px">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un pagne…">
+    <select name="order">
+      <option value="">Trier</option>
+      <option value="new" {% if request.GET.order == "new" %}selected{% endif %}>Nouveautés</option>
+      <option value="price_asc" {% if request.GET.order == "price_asc" %}selected{% endif %}>Prix ↑</option>
+      <option value="price_desc" {% if request.GET.order == "price_desc" %}selected{% endif %}>Prix ↓</option>
+    </select>
+    <button class="btn" type="submit">Filtrer</button>
+  </form>
+</div>
+
 <div class="grid">
-  {% for p in products %}
-  <a class="card" href="{% url 'product_detail' p.slug %}">
-    {% if p.thumbnail %}<img src="{{ p.thumbnail.url }}" alt="{{ p.name }}">{% endif %}
-    <div style="font-weight:700;margin-top:6px">{{ p.name }}</div>
-    <div style="margin-top:4px">{{ p.price }} FCFA</div>
-    <div><span class="btn">👀 Voir</span></div>
-  </a>
+  {% for p in page_obj %}
+    {% include "catalog/_product_card.html" with p=p %}
   {% empty %}
-  <p>Aucun produit dans cette catégorie.</p>
+    <p class="muted">Aucun article ne correspond à votre recherche.</p>
   {% endfor %}
 </div>
+
+{% if is_paginated %}
+  <div class="section pagination">
+    {% if page_obj.has_previous %}
+      <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ page_obj.previous_page_number }}">Précédent</a>
+    {% endif %}
+    {% for num in paginator.page_range %}
+      {% if num == page_obj.number %}
+        <span class="page active">{{ num }}</span>
+      {% elif num > page_obj.number|add:-2 and num < page_obj.number|add:2 %}
+        <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ num }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <a class="page" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.order %}order={{ request.GET.order }}&{% endif %}page={{ page_obj.next_page_number }}">Suivant</a>
+    {% endif %}
+  </div>
+{% endif %}
 {% endblock %}

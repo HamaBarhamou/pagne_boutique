@@ -1,14 +1,55 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}{{ product.name }} — {{ BUSINESS_NAME }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav class="breadcrumbs">
+  <a href="/">Accueil</a> ›
+  {% if product.category %}<a href="{% url 'product_list' product.category.slug %}">{{ product.category.name }}</a> ›{% endif %}
+  <span>{{ product.name }}</span>
+</nav>
+{% endblock %}
+
 {% block content %}
-<div style="display:flex;gap:20px;flex-wrap:wrap">
-  {% if product.thumbnail %}
-    <img src="{{ product.thumbnail.url }}" alt="{{ product.name }}" style="width:320px;max-width:100%;border-radius:12px">
-  {% endif %}
+<div class="p-layout">
   <div>
-    <h2>{{ product.name }}</h2>
-    <div style="font-size:22px;margin:8px 0">{{ product.price }} FCFA</div>
-    {% if wa %}<a class="btn" target="_blank" href="{{ wa }}">📲 Commander sur WhatsApp</a>{% endif %}
+    <div class="p-gallery">
+      {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}
+      {% if product.thumbnail and not product.image %}<img src="{{ product.thumbnail.url }}" alt="{{ product.name }}">{% endif %}
+      {% for img in product.images.all %}
+        <img src="{{ img.image.url }}" alt="{{ product.name }} - {{ forloop.counter }}">
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+    <h1 style="margin-top:0">{{ product.name }}</h1>
+    {% if product.category %}<div class="muted" style="margin:6px 0">{{ product.category.name }}</div>{% endif %}
+    <div class="price" style="font-size:22px;margin:10px 0">{{ product.price|intcomma }} FCFA</div>
+
+    {% if product.short_description %}
+      <p>{{ product.short_description }}</p>
+    {% endif %}
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0">
+      <a class="btn" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}?text={{ product.name|urlencode }}%20—%20{{ request.build_absolute_uri|urlencode }}">Commander sur WhatsApp</a>
+      <a class="btn btn-outline" href="javascript:history.back()">Retour</a>
+    </div>
+
+    {% if product.details %}
+      <h3>Détails</h3>
+      <div>{{ product.details|linebreaks }}</div>
+    {% endif %}
+
+    {% if related_products %}
+      <div class="section">
+        <h3>Vous aimerez aussi</h3>
+        <div class="grid">
+          {% for p in related_products %}
+            {% include "catalog/_product_card.html" with p=p %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

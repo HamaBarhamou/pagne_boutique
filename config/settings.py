@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "catalog",
 ]
 
@@ -55,14 +56,14 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates'],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "catalog.context.business_info",
+                "catalog.context.business_context",
             ],
         },
     },
@@ -124,3 +125,20 @@ MEDIA_ROOT = BASE_DIR.parent / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+BUSINESS_NAME = "ABH – Compagny"
+BUSINESS_TAGLINE = "Votre référence en pagnes de qualité à Niamey"
+BUSINESS_PHONE = "+227 96 53 66 60 / +227 91 38 08 77"
+BUSINESS_WHATSAPP = "22796536660"  # sans +
+BUSINESS_ADDRESS = (
+    "Marché Tagabati, à côté des taxis de Harobanda, voie vers UGAN, Niamey"
+)
+BUSINESS_HOURS = "Lun–Sam : 8h–19h"
+BUSINESS_FACEBOOK = ""
+BUSINESS_INSTAGRAM = ""
+
+# Emails pro (affichage + mailto)
+BUSINESS_EMAIL = "contact@abh.com"
+BUSINESS_EMAIL_SALES = "ventes@abh.com"
+BUSINESS_EMAIL_SUPPORT = "support@abh.com"

@@ -1,48 +1,132 @@
+{% load static %}
 <!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{% block title %}{{ BUSINESS_NAME }}{% endblock %}</title>
+  <title>{% block title %}{{ BUSINESS_NAME }} — {{ BUSINESS_TAGLINE|default:"Boutique de pagnes à Niamey" }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ BUSINESS_NAME }}: pagnes Wax, Bazin, Brodés — qualité, prix justes, service réactif à Niamey.{% endblock %}">
+  <meta name="theme-color" content="#0a0a0a">
+  <!-- OpenGraph -->
+  <meta property="og:title" content="{% block og_title %}{{ BUSINESS_NAME }}{% endblock %}">
+  <meta property="og:description" content="{% block og_desc %}{{ BUSINESS_TAGLINE|default:'Pagne boutique — qualité & style' }}{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri|default:'' }}">
+  <meta property="og:image" content="{% block og_image %}{% static 'img/og-default.jpg' %}{% endblock %}">
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;margin:0;background:#fafafa;color:#111}
-    header,footer{background:#0a0a0a;color:#fff}
-    header .wrap, footer .wrap{max-width:1000px;margin:0 auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+    :root{
+      --bg:#0b0b0b;--fg:#111;--muted:#6b7280;--card:#fff;--brand:#0a0a0a;--brand-2:#f59e0b;
+      --ring:rgba(0,0,0,.08)
+    }
+    @media (prefers-color-scheme: dark){
+      :root{--fg:#fafafa;--bg:#0a0a0a;--card:#111;--muted:#9ca3af;--ring:rgba(255,255,255,.1)}
+      header,footer{background:#0a0a0a}
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;margin:0;background:#f7f7f8;color:var(--fg)}
     a{color:inherit;text-decoration:none}
-    nav a{margin-left:12px}
-    .container{max-width:1000px;margin:0 auto;padding:16px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
-    .card{background:#fff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-    .card img{width:100%;height:180px;object-fit:cover;border-radius:8px}
-    .btn{display:inline-block;background:#0a0a0a;color:#fff;padding:12px 16px;border-radius:12px}
-    .float-wa{position:fixed;right:16px;bottom:16px;background:#25D366;color:#fff;padding:12px 16px;border-radius:999px;font-weight:700}
+    img{max-width:100%;display:block}
+    .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+    /* Header */
+    header{position:sticky;top:0;z-index:50;background:#ffffffee;backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--ring)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+    nav a{margin-left:16px;padding:8px 10px;border-radius:10px}
+    nav a:hover{background:var(--ring)}
+    /* Layout */
+    main{padding:24px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.04)}
+    .card-body{padding:12px}
+    .price{font-weight:800}
+    .muted{color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--brand);color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;border:1px solid #000;transition:transform .06s ease}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-outline{background:transparent;color:var(--fg);border:1px solid var(--ring)}
+    .btn-ghost{background:transparent}
+    .hero{border-radius:20px;background:linear-gradient(135deg,#fff, #fdf6e5);border:1px solid var(--ring);padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+    .section{margin:28px 0}
+    .breadcrumbs{display:flex;gap:8px;align-items:center;font-size:14px}
+    .breadcrumbs a{color:var(--muted)}
+    /* Footer */
+    footer{border-top:1px solid var(--ring);background:#fff}
+    .foot{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;padding:22px 0}
+    .copy{padding:14px 0;border-top:1px solid var(--ring);font-size:14px;color:var(--muted)}
+    /* Floating WhatsApp */
+    .float-wa{position:fixed;right:16px;bottom:16px;background:#25D366;color:#fff;padding:14px 18px;border-radius:999px;
+      font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+    /* Forms */
+    input,select{height:42px;border-radius:10px;border:1px solid var(--ring);padding:0 12px;background:#fff}
+    /* Product */
+    .p-gallery{display:grid;grid-template-columns:1fr;gap:14px}
+    @media (min-width:900px){.p-layout{display:grid;grid-template-columns:1fr 1fr;gap:28px}.p-gallery{grid-template-columns:repeat(2,1fr)}}
+    .badge{display:inline-block;background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;font-size:12px}
+    .pill{display:inline-block;background:#111;color:#fff;padding:6px 10px;border-radius:999px;font-size:12px}
+    /* Pagination */
+    .pagination{display:flex;gap:6px;flex-wrap:wrap}
+    .page{padding:8px 12px;border:1px solid var(--ring);border-radius:10px;background:#fff}
+    .page.active{background:var(--brand);color:#fff;border-color:#000}
   </style>
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
 <header>
-  <div class="wrap">
-    <div style="font-weight:700">{{ BUSINESS_NAME }}</div>
+  <div class="wrap topbar">
+    <a href="/" class="brand">
+      <img src="{% static 'img/logo.svg' %}" alt="logo" width="28" height="28" loading="lazy">
+      <span>{{ BUSINESS_NAME }}</span>
+    </a>
     <nav>
-      <a href="/">🏠 Accueil</a>
-      <a href="/a-propos/">🏢 À propos</a>
-      <a href="/contact/">📞 Contact</a>
+      <a href="/">Accueil</a>
+      <a href="/a-propos/">À propos</a>
+      <a href="/contact/">Contact</a>
+      <a href="https://wa.me/{{ BUSINESS_WHATSAPP }}" target="_blank" class="btn">Commander</a>
     </nav>
   </div>
 </header>
 
-<main class="container">
+<main class="wrap">
+  {% block breadcrumbs %}{% endblock %}
   {% block content %}{% endblock %}
 </main>
 
 <footer>
-  <div class="wrap">
-    <div>{{ BUSINESS_ADDRESS }} — {{ BUSINESS_HOURS }}</div>
-    <div>Tel: {{ BUSINESS_PHONE }}</div>
+  <div class="wrap foot">
+    <div>
+      <strong>{{ BUSINESS_NAME }}</strong><br>
+      <span class="muted">{{ BUSINESS_TAGLINE }}</span><br><br>
+      <div>{{ BUSINESS_ADDRESS }}</div>
+      <div>Tél: {{ BUSINESS_PHONE }}</div>
+      <div>Horaires: {{ BUSINESS_HOURS }}</div>
+    </div>
+    <div>
+      <div class="muted">Suivre / Commander</div><br>
+      <a class="btn btn-outline" target="_blank" href="https://wa.me/{{ BUSINESS_WHATSAPP }}">WhatsApp</a>
+      {% if BUSINESS_INSTAGRAM %} <a class="btn btn-ghost" target="_blank" href="{{ BUSINESS_INSTAGRAM }}">Instagram</a>{% endif %}
+    </div>
+  </div>
+  <div class="wrap copy">
+    © {{ now|date:"Y" }} {{ BUSINESS_NAME }} — Tous droits réservés.
   </div>
 </footer>
 
 {% block floating %}
   <a class="float-wa" href="https://wa.me/{{ BUSINESS_WHATSAPP }}" target="_blank">WhatsApp</a>
 {% endblock %}
+
+<!-- LocalBusiness JSON-LD -->
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"Store",
+ "name":"{{ BUSINESS_NAME|escapejs }}",
+ "address":"{{ BUSINESS_ADDRESS|escapejs }}",
+ "telephone":"{{ BUSINESS_PHONE|escapejs }}",
+ "openingHours":"{{ BUSINESS_HOURS|escapejs }}",
+ "url":"{{ request.build_absolute_uri|default:''|escapejs }}"
+}
+</script>
+
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>
