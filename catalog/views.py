@@ -12,6 +12,34 @@ from django.contrib.auth import logout
 from .forms import ProductForm, CategoryForm
 
 
+def _apply_filters(qs, request):
+    """Recherche + tri communs aux listes."""
+    q = request.GET.get("q", "").strip()
+    order = request.GET.get("order", "")
+    if q:
+        qs = qs.filter(
+            Q(name__icontains=q)
+            | Q(slug__icontains=q)
+            | Q(category__name__icontains=q)
+        )
+    if order == "new":
+        qs = qs.order_by("-id")
+    elif order == "price_asc":
+        qs = qs.order_by("price", "-id")
+    elif order == "price_desc":
+        qs = qs.order_by("-price", "-id")
+    else:
+        # par défaut: alphabétique pour catégories, récent pour nouveautés (géré côté vues)
+        pass
+    return qs
+
+def _paginate(request, qs, per_page=12):
+    paginator = Paginator(qs, per_page)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return paginator, page_obj
+
+
 def _is_staff(user):
     return user.is_active and user.is_staff
 
@@ -191,27 +219,36 @@ def home(request):
         {"categories": categories, "products": products, "hero_cta": hero_cta},
     )
 
+def product_new(request):
+    """Liste transversale des nouveautés (toutes catégories confondues)."""
+    qs = Product.objects.filter(is_active=True)
+    # pour les nouveautés, le défaut est 'récent d'abord'
+    if "order" not in request.GET or request.GET.get("order") in ("", "new"):
+        qs = qs.order_by("-id")
+    qs = _apply_filters(qs, request)
+    paginator, page_obj = _paginate(request, qs, per_page=12)
 
+    current_category = {"name": "Nouveautés"}
+    return render(
+        request,
+        "catalog/product_list.html",
+        {
+            "current_category": current_category,
+            "page_obj": page_obj,
+            "paginator": paginator,
+            "is_paginated": page_obj.has_other_pages(),
+        },
+    )
+
+# remplace ta product_list existante par ceci pour réutiliser les helpers
 def product_list(request, slug):
     category = get_object_or_404(Category, slug=slug)
     qs = category.products.filter(is_active=True)
-
-    q = request.GET.get("q", "").strip()
-    order = request.GET.get("order", "")
-    if q:
-        qs = qs.filter(Q(name__icontains=q) | Q(slug__icontains=q))
-    if order == "new":
-        qs = qs.order_by("-id")
-    elif order == "price_asc":
-        qs = qs.order_by("price")
-    elif order == "price_desc":
-        qs = qs.order_by("-price")
-    else:
+    # pour les catégories, défaut = alphabétique si aucun tri demandé
+    if "order" not in request.GET or request.GET.get("order") == "":
         qs = qs.order_by("name")
-
-    paginator = Paginator(qs, 12)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    qs = _apply_filters(qs, request)
+    paginator, page_obj = _paginate(request, qs, per_page=12)
 
     return render(
         request,

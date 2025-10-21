@@ -9,6 +9,7 @@ urlpatterns = [
     path("", catalog_views.home, name="home"),
     path("a-propos/", catalog_views.about, name="about"),
     path("contact/", catalog_views.contact, name="contact"),
+    path("c/nouveautes/", catalog_views.product_new, name="product_new"),
     path("c/<slug:slug>/", catalog_views.product_list, name="product_list"),
     path("p/<slug:slug>/", catalog_views.product_detail, name="product_detail"),
     # Staff area
