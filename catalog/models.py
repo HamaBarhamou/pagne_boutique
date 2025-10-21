@@ -60,12 +60,20 @@ class BusinessSetting(models.Model):
 
     logo = models.ImageField(upload_to="branding/", blank=True, null=True)
 
+    # Multi-site light
+    domain = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="Ex: boutique-amina.com ou amina.localhost",
+    )
+    is_active = models.BooleanField(default=True)
+
     class Meta:
         verbose_name = "Réglages boutique"
         verbose_name_plural = "Réglages boutique"
 
     def __str__(self):
-        return "Réglages boutique"
+        return f"{self.name} — {self.domain}"
 
     @classmethod
     def get_solo(cls):

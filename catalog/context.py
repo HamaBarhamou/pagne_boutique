@@ -3,7 +3,7 @@ from django.templatetags.static import static
 
 
 def business_context(request):
-    s = BusinessSetting.get_solo()
+    s = getattr(request, "store", None)
     return {
         "BUSINESS_NAME": s.name,
         "BUSINESS_TAGLINE": s.tagline,

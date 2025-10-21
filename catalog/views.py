@@ -18,9 +18,7 @@ def _apply_filters(qs, request):
     order = request.GET.get("order", "")
     if q:
         qs = qs.filter(
-            Q(name__icontains=q)
-            | Q(slug__icontains=q)
-            | Q(category__name__icontains=q)
+            Q(name__icontains=q) | Q(slug__icontains=q) | Q(category__name__icontains=q)
         )
     if order == "new":
         qs = qs.order_by("-id")
@@ -32,6 +30,7 @@ def _apply_filters(qs, request):
         # par défaut: alphabétique pour catégories, récent pour nouveautés (géré côté vues)
         pass
     return qs
+
 
 def _paginate(request, qs, per_page=12):
     paginator = Paginator(qs, per_page)
@@ -204,20 +203,25 @@ def staff_dashboard(request):
     )
 
 
-def _wa_link(text: str):
-    phone = getattr(settings, "BUSINESS_WHATSAPP", "") or ""
+def _wa_link(text: str, store=None):
+    phone = ""
+    if store and getattr(store, "whatsapp", ""):
+        phone = store.whatsapp
+    else:
+        phone = getattr(settings, "BUSINESS_WHATSAPP", "") or ""
     return f"https://wa.me/{phone}?text={quote(text)}" if phone else None
 
 
 def home(request):
     categories = Category.objects.all()[:8]
     products = Product.objects.filter(is_active=True).order_by("-id")[:16]
-    hero_cta = _wa_link("Bonjour, je suis intéressé(e) par vos pagnes.")
+    hero_cta = _wa_link("Bonjour, je suis intéressé(e) par vos pagnes.", request.store)
     return render(
         request,
         "home.html",
         {"categories": categories, "products": products, "hero_cta": hero_cta},
     )
+
 
 def product_new(request):
     """Liste transversale des nouveautés (toutes catégories confondues)."""
@@ -239,6 +243,7 @@ def product_new(request):
             "is_paginated": page_obj.has_other_pages(),
         },
     )
+
 
 # remplace ta product_list existante par ceci pour réutiliser les helpers
 def product_list(request, slug):
@@ -264,7 +269,10 @@ def product_list(request, slug):
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
-    wa = _wa_link(f"Bonjour, je veux le pagne: {product.name} ({product.price} FCFA).")
+    wa = _wa_link(
+        f"Bonjour, je veux le pagne: {product.name} ({product.price} FCFA).",
+        request.store,
+    )
     # proposer 4 produits de la même catégorie (si possible)
     related = (
         Product.objects.filter(is_active=True, category=product.category)
@@ -279,12 +287,14 @@ def product_detail(request, slug):
 
 
 def about(request):
-    wa = _wa_link("Bonjour, je veux des informations sur votre boutique.")
+    wa = _wa_link(
+        "Bonjour, je veux des informations sur votre boutique.", request.store
+    )
     return render(request, "about.html", {"wa": wa})
 
 
 def contact(request):
-    wa = _wa_link("Bonjour, je veux commander un pagne.")
+    wa = _wa_link("Bonjour, je veux commander un pagne.", request.store)
     maps_q = quote(getattr(settings, "BUSINESS_ADDRESS", "Niamey"))
     maps_url = f"https://www.google.com/maps/search/?api=1&query={maps_q}"
     return render(request, "contact.html", {"wa": wa, "maps_url": maps_url})

@@ -4,7 +4,6 @@ from . import views as catalog_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     # Site public
     path("", catalog_views.home, name="home"),
     path("a-propos/", catalog_views.about, name="about"),

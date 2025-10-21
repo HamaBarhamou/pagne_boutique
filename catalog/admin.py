@@ -22,20 +22,25 @@ class ProductAdmin(admin.ModelAdmin):
 class BusinessSettingAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Identité", {"fields": ("name", "tagline", "logo", "logo_preview")}),
+        ("Domaine", {"fields": ("domain", "is_active")}),
         ("Coordonnées", {"fields": ("address", "phone", "whatsapp", "hours")}),
         ("Réseaux", {"fields": ("instagram",)}),
     )
     readonly_fields = ("logo_preview",)
+    list_display = ("name", "domain", "is_active", "phone", "whatsapp")
+    list_filter = ("is_active",)
+    search_fields = ("name", "domain", "phone", "whatsapp")
 
     def logo_preview(self, obj):
         if obj and obj.logo:
+            from django.utils.html import format_html
+
             return format_html(
-                '<img src="{}" style="max-height:60px;border-radius:8px">', obj.logo.url
+                '<img src="{}" style="max-height:42px;border-radius:6px">', obj.logo.url
             )
         return "—"
 
     logo_preview.short_description = "Aperçu du logo"
 
-    def has_add_permission(self, request):
-        # Empêche d'ajouter plus d’une instance
-        return not BusinessSetting.objects.exists()
+    # on NE bloque plus l'add — on veut plusieurs boutiques à terme
+    # def has_add_permission(self, request): return True
