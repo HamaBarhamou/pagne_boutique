@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Catégories — Espace staff{% endblock %}
+
+{% block extra_head %}
+<style>
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .toolbar-right{display:flex;gap:8px;flex-wrap:wrap}
+  .subtle{color:var(--muted);font-size:13px}
+  .inp{height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg)}
+  .tbl-wrap{border:1px solid var(--ring);border-radius:14px;overflow:hidden;background:var(--card)}
+  .tbl{width:100%;border-collapse:separate;border-spacing:0}
+  .tbl th,.tbl td{padding:12px 14px;border-bottom:1px solid var(--ring);text-align:left;vertical-align:middle}
+  .tbl thead th{background:var(--surface);font-weight:700;position:sticky;top:0;z-index:1}
+  .tbl tbody tr:nth-child(even){background:rgba(0,0,0,.015)}
+  .tbl tbody tr:hover{background:rgba(0,0,0,.03)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn.danger{background:#b42318;color:#fff;border:1px solid rgba(0,0,0,.2)}
+  /* responsive */
+  @media (max-width: 860px){
+    .tbl thead{display:none}
+    .tbl, .tbl tbody, .tbl tr, .tbl td{display:block;width:100%}
+    .tbl tr{border-bottom:1px solid var(--ring);padding:10px 0}
+    .tbl td{border:none;padding:6px 14px}
+    .tbl td[data-label]:before{content:attr(data-label);display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="toolbar">
+    <div>
+      <h1 style="margin:0">Catégories</h1>
+      <span class="subtle">{{ page_obj.paginator.count }} catégorie{{ page_obj.paginator.count|pluralize:",s" }}</span>
+    </div>
+    <div class="toolbar-right">
+      <form method="get" style="display:flex;gap:8px">
+        <input class="inp" type="search" name="q" value="{{ q }}" placeholder="Rechercher par nom ou slug…">
+        <button class="btn outline" type="submit">Rechercher</button>
+      </form>
+      <a class="btn primary" href="{% url 'staff_category_create' %}">Nouvelle catégorie</a>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Slug</th>
+          <th>Produits</th>
+          <th style="width:240px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in page_obj %}
+          <tr>
+            <td data-label="Nom" style="font-weight:700">{{ c.name }}</td>
+            <td data-label="Slug"><code style="background:var(--surface);padding:2px 6px;border-radius:8px;border:1px solid var(--ring)">{{ c.slug }}</code></td>
+            <td data-label="Produits">{{ c.n }}</td>
+            <td data-label="Actions">
+              <div class="actions">
+                <a class="btn outline" href="{% url 'staff_product_create' %}?category={{ c.pk }}">Ajouter un produit</a>
+                <a class="btn outline" href="{% url 'staff_category_edit' c.pk %}">Éditer</a>
+                <a class="btn danger" href="{% url 'staff_category_delete' c.pk %}">Supprimer</a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" style="text-align:center;color:var(--muted)">Aucune catégorie.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <div class="section pagination" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+      {% if page_obj.has_previous %}
+        <a class="page" href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.previous_page_number }}">Précédent</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <span class="page active">{{ num }}</span>
+        {% elif num > page_obj.number|add:-2 and num < page_obj.number|add:2 %}
+          <a class="page" href="?{% if q %}q={{ q }}&{% endif %}page={{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a class="page" href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.next_page_number }}">Suivant</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

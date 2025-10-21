@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "create" %}Nouvelle catégorie{% else %}Éditer catégorie{% endif %} — Espace staff{% endblock %}
+
+{% block extra_head %}
+<style>
+  .inp{height:42px;border-radius:12px;border:1px solid var(--ring);padding:0 12px;background:var(--card);color:var(--fg);width:100%}
+  .form-card{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:16px}
+  .row{display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width:900px){.row{grid-template-columns:1fr 1fr}}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <h1 style="margin:0 0 10px">{% if mode == "create" %}Nouvelle catégorie{% else %}Éditer catégorie{% endif %}</h1>
+  <form method="post" class="form-card">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="badge coral" style="display:inline-block;margin-bottom:10px">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row">
+      <label>Nom {{ form.name }}</label>
+      <label>Slug {{ form.slug }}</label>
+    </div>
+
+    <div class="actions" style="margin-top:12px">
+      <button class="btn primary" type="submit">{% if mode == "create" %}Créer{% else %}Enregistrer{% endif %}</button>
+      <a class="btn outline" href="{% url 'staff_categories_list' %}">Annuler</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

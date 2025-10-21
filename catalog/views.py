@@ -6,9 +6,10 @@ from django.conf import settings
 from .models import Category, Product
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
+from django.db import IntegrityError
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import logout
-from .forms import ProductForm
+from .forms import ProductForm, CategoryForm
 
 
 def _is_staff(user):
@@ -23,6 +24,69 @@ def staff_logout(request):
     if request.user.is_authenticated:
         logout(request)
     return redirect("home")
+
+
+@user_passes_test(_is_staff)
+def staff_categories_list(request):
+    q = request.GET.get("q", "").strip()
+    qs = Category.objects.annotate(n=Count("products")).order_by("name")
+    if q:
+        qs = qs.filter(Q(name__icontains=q) | Q(slug__icontains=q))
+
+    paginator = Paginator(qs, 20)
+    page = request.GET.get("page")
+    page_obj = paginator.get_page(page)
+    return render(request, "staff/categories/list.html", {"page_obj": page_obj, "q": q})
+
+
+@user_passes_test(_is_staff)
+def staff_category_create(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Catégorie créée avec succès.")
+            return redirect("staff_categories_list")
+    else:
+        form = CategoryForm()
+    return render(
+        request, "staff/categories/form.html", {"form": form, "mode": "create"}
+    )
+
+
+@user_passes_test(_is_staff)
+def staff_category_edit(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == "POST":
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Catégorie mise à jour.")
+            return redirect("staff_categories_list")
+    else:
+        form = CategoryForm(instance=category)
+    return render(
+        request,
+        "staff/categories/form.html",
+        {"form": form, "mode": "edit", "category": category},
+    )
+
+
+@user_passes_test(_is_staff)
+def staff_category_delete(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == "POST":
+        try:
+            category.delete()  # FK Product(category) est PROTECT → peut lever IntegrityError
+            messages.success(request, "Catégorie supprimée.")
+        except IntegrityError:
+            messages.error(
+                request, "Impossible de supprimer: des produits y sont rattachés."
+            )
+        return redirect("staff_categories_list")
+    return render(
+        request, "staff/categories/confirm_delete.html", {"category": category}
+    )
 
 
 @user_passes_test(_is_staff)
@@ -42,14 +106,18 @@ def staff_products_list(request):
 
 @user_passes_test(_is_staff)
 def staff_product_create(request):
+    initial = {}
+    cat_id = request.GET.get("category")
+    if cat_id and cat_id.isdigit():
+        initial["category"] = cat_id
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save()
+            form.save()
             messages.success(request, "Produit créé avec succès.")
             return redirect("staff_products_list")
     else:
-        form = ProductForm()
+        form = ProductForm(initial=initial)
     return render(request, "staff/products/form.html", {"form": form, "mode": "create"})
 
 

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Supprimer catégorie — Espace staff{% endblock %}
+{% block content %}
+<section class="section" style="max-width:640px">
+  <div class="hero" style="border-radius:16px">
+    <h1 style="margin:0 0 10px">Supprimer la catégorie</h1>
+    <p>Voulez-vous vraiment supprimer <strong>{{ category.name }}</strong> ?</p>
+    <p class="muted" style="margin-top:-6px">Si des produits y sont rattachés, la suppression échouera.</p>
+    <form method="post" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      {% csrf_token %}
+      <button class="btn" type="submit" style="background:#b42318;color:#fff;border:1px solid rgba(0,0,0,.2)">Supprimer</button>
+      <a class="btn outline" href="{% url 'staff_categories_list' %}">Annuler</a>
+    </form>
+  </div>
+</section>
+{% endblock %}

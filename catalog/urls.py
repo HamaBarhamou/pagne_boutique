@@ -43,4 +43,25 @@ urlpatterns = [
         catalog_views.staff_product_toggle,
         name="staff_product_toggle",
     ),
+    # Staff — catégories
+    path(
+        "staff/categories/",
+        catalog_views.staff_categories_list,
+        name="staff_categories_list",
+    ),
+    path(
+        "staff/categories/new/",
+        catalog_views.staff_category_create,
+        name="staff_category_create",
+    ),
+    path(
+        "staff/categories/<int:pk>/edit/",
+        catalog_views.staff_category_edit,
+        name="staff_category_edit",
+    ),
+    path(
+        "staff/categories/<int:pk>/delete/",
+        catalog_views.staff_category_delete,
+        name="staff_category_delete",
+    ),
 ]
