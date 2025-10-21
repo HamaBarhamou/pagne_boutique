@@ -109,9 +109,10 @@
 <header>
   <div class="wrap topbar">
     <a href="/" class="brand">
-      <img src="{% static 'img/logo.svg' %}" width="28" height="28" alt="">
+      <img src="{{ BUSINESS_LOGO_URL }}" width="28" height="28" alt="{{ BUSINESS_NAME }}">
       <span>{{ BUSINESS_NAME }}</span>
     </a>
+
     <nav class="nav">
       <a href="/" class="link">Accueil</a>
       <a href="/a-propos/" class="link">À propos</a>

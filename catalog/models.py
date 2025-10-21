@@ -58,6 +58,8 @@ class BusinessSetting(models.Model):
     )
     instagram = models.URLField("Lien Instagram", blank=True, default="")
 
+    logo = models.ImageField(upload_to="branding/", blank=True, null=True)
+
     class Meta:
         verbose_name = "Réglages boutique"
         verbose_name_plural = "Réglages boutique"
